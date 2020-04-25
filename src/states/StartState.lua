@@ -21,6 +21,7 @@ StartState = Class{__includes = BaseState}
 local highlighted = 1
 
 function StartState:enter(params)
+    self.startLevel = params.startLevel
     self.highScores = params.highScores
 end
 
@@ -37,7 +38,8 @@ function StartState:update(dt)
 
         if highlighted == 1 then
             gStateMachine:change('paddle-select', {
-                highScores = self.highScores
+                highScores = self.highScores,
+                startLevel = self.startLevel
             })
         else
             gStateMachine:change('high-scores', {

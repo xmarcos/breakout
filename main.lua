@@ -30,7 +30,7 @@ require 'src/Dependencies'
     Called just once at the beginning of the game; used to set up
     game objects, variables, etc. and prepare the game world.
 ]]
-function love.load()
+function love.load(cli_args)
     -- set love's default filter to "nearest-neighbor", which essentially
     -- means there will be no filtering of pixels (blurriness), which is
     -- important for a nice crisp, 2D look
@@ -97,6 +97,16 @@ function love.load()
         ['music'] = love.audio.newSource('sounds/music.wav', 'static')
     }
 
+    DEBUG_MODE = #cli_args > 0
+    local START_LEVEL = 0
+
+    if DEBUG_MODE then
+        love.audio.setVolume(0.1)
+        if (cli_args[1] == 'level') then
+            START_LEVEL = tonumber(cli_args[2])
+        end
+    end
+
     -- the state machine we'll be using to transition between various states
     -- in our game instead of clumping them together in our update and draw
     -- methods
@@ -119,6 +129,7 @@ function love.load()
         ['paddle-select'] = function() return PaddleSelectState() end
     }
     gStateMachine:change('start', {
+        startLevel = START_LEVEL,
         highScores = loadHighScores()
     })
 
@@ -206,8 +217,10 @@ function love.draw()
     -- use the state machine to defer rendering to the current state we're in
     gStateMachine:render()
 
-    -- display FPS for debugging; simply comment out to remove
-    displayFPS()
+    if DEBUG_MODE then
+        -- display FPS for debugging; simply comment out to remove
+        displayFPS()
+    end
 
     push:apply('end')
 end
